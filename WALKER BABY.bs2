@@ -1,0 +1,43 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+lfR VAR Word
+lfF VAR Word
+rtF VAR Word
+rtR VAR Word
+counter VAR Word
+stride CON 150
+mid VAR Word
+mid = 750
+mini VAR Word
+mini = 500+stride
+maxi VAR Word
+maxi = 1000-stride
+stp CON 20
+DO
+  IF IN0 THEN
+  DO
+    FOR rtF = mid TO maxi STEP stp
+       PULSOUT 15, rtF
+       PULSOUT 13, mini+maxi - rtF
+       PAUSE 10
+    NEXT
+    FOR rtF = maxi TO mini STEP stp
+       PULSOUT 15, rtF
+       PULSOUT 13, mini+maxi - rtF
+       PAUSE 10
+    NEXT
+    FOR rtF = mid TO maxi STEP stp
+       PULSOUT 12, rtF
+       PULSOUT 14, mini+maxi - rtF
+       PAUSE 10
+    NEXT
+    FOR rtF = maxi TO mini STEP stp
+       PULSOUT 12, rtF
+       PULSOUT 14, mini+maxi - rtF
+       PAUSE 10
+    NEXT
+    LOOP
+  ELSE
+    PAUSE 1
+  ENDIF
+LOOP

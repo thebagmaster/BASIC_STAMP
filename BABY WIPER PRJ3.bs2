@@ -1,0 +1,124 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+counter VAR Word
+counter = 500
+flag VAR Byte
+flag = 0
+GLED PIN 14
+RLED PIN 13
+DO
+  LOW RLED
+  LOW GLED
+  DO
+    PULSOUT 15, 750
+    PAUSE 20
+  LOOP UNTIL IN0 = 1
+  PAUSE 200
+  flag = 1
+  DO
+    HIGH GLED
+    LOW RLED
+    FOR counter = 750 TO 1000 STEP 15
+      PULSOUT 15, counter
+      IF IN0 THEN
+        GOTO slow
+      ENDIF
+      IF IN1 THEN
+        flag = flag + 1
+        GOTO endofloop
+      ENDIF
+      PAUSE 10
+    NEXT
+    HIGH RLED
+    LOW GLED
+    FOR counter = 1000 TO 500 STEP 15
+      PULSOUT 15, counter
+      IF IN0 THEN
+        GOTO slow
+      ENDIF
+      IF IN1 THEN
+        flag = flag + 1
+        GOTO endofloop
+      ENDIF
+      PAUSE 10
+    NEXT
+    HIGH GLED
+    LOW RLED
+    FOR counter = 500 TO 750 STEP 15
+      PULSOUT 15, counter
+      IF IN0 THEN
+        GOTO slow
+      ENDIF
+      IF IN1 THEN
+        flag = flag + 1
+        GOTO endofloop
+      ENDIF
+      PAUSE 10
+    NEXT
+    FOR counter = 1 TO (750 * flag)
+      IF (counter//(flag*100) = 0) THEN
+        HIGH RLED
+        LOW GLED
+      ELSEIF (counter//(flag*100) = 50) THEN
+        HIGH GLED
+        LOW RLED
+      ENDIF
+      PAUSE 1
+      IF IN0 THEN
+        GOTO slow
+      ENDIF
+      IF IN1 THEN
+        flag = flag + 1
+        GOTO endofloop
+      ENDIF
+      PULSOUT 15, 750
+    NEXT
+    endofloop:
+    IF flag > 3 THEN
+      flag = 1
+    ENDIF
+    PAUSE 200
+  LOOP
+  slow:
+  HIGH GLED
+  LOW RLED
+  PAUSE 200
+  DO
+    FOR counter = 500 TO 1000 STEP 10
+        PULSOUT 15, counter
+        IF IN0 THEN
+          GOTO fast
+        ENDIF
+        PAUSE 10
+      NEXT
+    FOR counter = 1000 TO 500 STEP 10
+      PULSOUT 15, counter
+      IF IN0 THEN
+        GOTO fast
+      ENDIF
+      PAUSE 10
+    NEXT
+  LOOP
+  fast:
+  PAUSE 200
+  HIGH RLED
+  LOW GLED
+  DO
+    FOR counter = 500 TO 1000 STEP 15
+        PULSOUT 15, counter
+        IF IN0 THEN
+          GOTO start
+        ENDIF
+        PAUSE 7
+      NEXT
+    FOR counter = 1000 TO 500 STEP 15
+      PULSOUT 15, counter
+      IF IN0 THEN
+        GOTO start
+      ENDIF
+      PAUSE 7
+    NEXT
+  LOOP
+  start:
+  PAUSE 200
+LOOP

@@ -1,0 +1,182 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+' PacMan Display - Daniel Nichols
+
+Right00 DATA $0E,$1F,$1C,$18,$1C,$1F,$0E,$00
+Right01 DATA $07,$0F,$0F,$0C,$0F,$0F,$07,$00
+Right02 DATA $03,$07,$07,$07,$07,$07,$03,$00
+Right03 DATA $01,$03,$03,$03,$03,$03,$01,$00
+Right04 DATA $00,$01,$01,$01,$01,$01,$00,$00
+
+Right10 DATA $00(8)
+Right11 DATA $00,$10,$10,$00,$10,$10,$00,$00
+Right12 DATA $10,$18,$18,$18,$18,$18,$10,$00
+Right13 DATA $18,$1C,$1C,$00,$1C,$1C,$18,$00
+Right14 DATA $1C,$1E,$18,$10,$18,$1E,$1C,$00
+
+Left04  DATA $07,$0F,$03,$01,$03,$0F,$07,$00
+Left03  DATA $03,$07,$07,$00,$07,$07,$03,$00
+Left02  DATA $01,$03,$03,$03,$03,$03,$01,$00
+Left01  DATA $00,$01,$01,$00,$01,$01,$00,$00
+Left10  DATA $0E,$1F,$07,$03,$07,$1F,$0E,$00
+
+Left14  DATA $00,$10,$10,$10,$10,$10,$00,$00
+Left13  DATA $10,$18,$18,$18,$18,$18,$10,$00
+Left12  DATA $18,$1C,$1C,$1C,$1C,$1C,$18,$00
+Left11  DATA $1C,$1E,$1E,$06,$1E,$1E,$1C,$00
+Left00  DATA $00(8)
+
+Down00  DATA $0E,$1F,$1F,$1F,$1B,$11,$00,$00
+Down01  DATA $00,$0E,$1F,$1F,$1F,$1B,$1B,$0A
+Down02  DATA $00,$00,$0E,$1F,$1F,$1F,$1F,$1F
+Down03  DATA $00,$00,$00,$0E,$1F,$1F,$1F,$1B
+Down04  DATA $00,$00,$00,$00,$0E,$1F,$1F,$1F
+Down05  DATA $00,$00,$00,$00,$00,$0E,$1F,$1F
+Down06  DATA $00,$00,$00,$00,$00,$00,$0E,$1F
+Down07  DATA $00,$00,$00,$00,$00,$00,$00,$0E
+Down08  DATA $00(8)
+
+Down10  DATA $00(8)
+Down11  DATA $00(8)
+Down12  DATA $0E,$00,$00,$00,$00,$00,$00,$00
+Down13  DATA $1B,$0A,$00,$00,$00,$00,$00,$00
+Down14  DATA $1B,$11,$00,$00,$00,$00,$00,$00
+Down15  DATA $1F,$1B,$1B,$0A,$00,$00,$00,$00
+Down16  DATA $1F,$1F,$1F,$1F,$0E,$00,$00,$00
+Down17  DATA $1F,$1F,$1F,$1B,$1B,$0A,$00,$00
+Down18  DATA $0E,$1F,$1F,$1F,$1B,$11,$00,$00
+
+
+Up10    DATA $00(8)
+Up11    DATA $00(8)
+Up12    DATA $00,$00,$00,$00,$00,$00,$00,$0E
+Up13    DATA $00,$00,$00,$00,$00,$00,$0A,$1B
+Up14    DATA $00,$00,$00,$00,$00,$00,$11,$1B
+Up15    DATA $00,$00,$00,$00,$0A,$1B,$1B,$1F
+Up16    DATA $00,$00,$00,$0E,$1F,$1F,$1F,$1F
+Up17    DATA $00,$00,$0A,$1B,$1B,$1F,$1F,$1F
+Up18    DATA $00,$00,$11,$1B,$1F,$1F,$1F,$0E
+
+Up00    DATA $00,$11,$1B,$1F,$1F,$1F,$0E,$00
+Up01    DATA $0A,$1B,$1B,$1F,$1F,$1F,$0E,$00
+Up02    DATA $1F,$1F,$1F,$1F,$1F,$0E,$00,$00
+Up03    DATA $1B,$1F,$1F,$1F,$0E,$00,$00,$00
+Up04    DATA $1F,$1F,$1F,$0E,$00,$00,$00,$00
+Up05    DATA $1F,$1F,$0E,$00,$00,$00,$00,$00
+Up06    DATA $1F,$0E,$00,$00,$00,$00,$00,$00
+Up07    DATA $0E,$00,$00,$00,$00,$00,$00,$00
+Up08    DATA $00(8)
+
+temp VAR Byte
+addr VAR Word
+ani VAR Nib
+Line0 CON 128
+Line1 CON 148
+i VAR Byte
+in VAR Bit
+up VAR Bit
+char VAR Nib
+
+char = 0
+addr = 0
+in = 1
+up = 0
+i = 0
+ani = 0
+PAUSE 250                                    ' Debounce power supply
+
+SEROUT 14, 84, [22, 12]
+PAUSE 5
+
+
+' -----[ Main Routine ]-------------------------------------------------------
+
+DO
+  IF ani = 15 THEN ani = 4                         ' odd glitch
+
+  GOSUB aniPac
+
+  SEROUT 14, 84, [Line0+i]                         ' Cursor -> Line 0, char
+  SEROUT 14, 84, [0,1]                             ' Display Custom Character 0
+
+  'PAUSE 500
+
+  IF ani = 4 THEN IF in THEN i = i + 1 ELSEIF in=0 THEN i = i - 1
+  ENDIF
+
+  IF in THEN ani = ani + 1 ELSE ani = ani - 1
+
+  IF in THEN IF ani > 4 THEN ani = 0
+  ENDIF
+
+  IF i = 15 THEN
+    GOSUB aniPacVert
+    i = 35
+    in = 0
+  ENDIF
+  IF i = 19 THEN
+    GOSUB aniPacVert
+    i = 0
+    in = 1
+  ENDIF
+
+  IF in THEN
+    IF ani = 0 THEN
+      SEROUT 14, 84, [12]
+      PAUSE 5
+    ENDIF
+  ELSEIF ani = 3 THEN
+    SEROUT 14, 84, [12]
+    PAUSE 5
+  ENDIF
+
+
+
+LOOP
+
+readStr:
+DEBUG ? ani
+IF in = 0 THEN addr = addr + 80
+IF up AND (addr > 159) THEN addr = addr + 72
+char = 0
+DO
+  READ addr, temp
+  addr = addr + 1
+  char = char + 1
+  IF char > 8 THEN RETURN
+  SEROUT 14,84,[temp]
+LOOP
+
+aniPac:
+  SEROUT 14, 84, [248]
+  addr = (ani*8)    :  GOSUB readStr
+  SEROUT 14, 84, [249]
+  addr = (ani*8+40) :  GOSUB readStr
+RETURN
+
+aniPacVert:
+  SEROUT 14, 84, [22, 12]
+  PAUSE 5
+  ani = 0
+  IF up THEN
+    SEROUT 14, 84, [248]
+    addr = Right10 :  GOSUB readStr
+    SEROUT 14, 84, [Line0,0,Line1,1]
+  ELSE
+    SEROUT 14, 84, [249]
+    addr = Right10 :  GOSUB readStr
+    SEROUT 14, 84, [Line0+i,0,Line1+i,1]
+  ENDIF
+
+  FOR ani = 0 TO 8
+    SEROUT 14, 84, [248]
+    addr = (ani*8+160) : GOSUB readStr
+    SEROUT 14, 84, [249]
+    addr = (ani*8+232) : GOSUB readStr
+    PAUSE 500
+  NEXT
+  ani = 4
+  SEROUT 14, 84, [12]
+  PAUSE 5
+  IF up THEN up = 0 ELSE up = 1
+RETURN

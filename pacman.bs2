@@ -1,0 +1,26 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+A CON 220
+As CON 221
+B CON 222
+C CON 223
+Cs CON 224
+D CON 225
+Ds CON 226
+E CON 227
+F CON 228
+Fs CON 229
+G CON 230
+Gs CON 231
+P CON 232
+bitetranote CON 208
+hexadecnote CON 209
+eighthnote CON 210
+S3 CON 215
+S4 CON 216
+S5 CON 217
+S6 CON 218
+PAUSE 250
+SEROUT 14, 84, [eighthnote]
+SEROUT 14, 84, [S4,B,S5,B,Fs,Ds,B,Fs,Ds,C,S6,C,S5,G,E,S6,C,S5,G,E,S4,B,S5,B,Fs,Ds,B,Fs,Ds,hexadecnote,Ds,E,F,F,Fs,G,G,Gs,S6,A,A,As,B]
+'SEROUT 14, 84, [bitetranote,S3,C,P,A,C,P,A,C,P,A,C,P,A,C,P,A,C,P,A,C,P,A,C,P,A]
